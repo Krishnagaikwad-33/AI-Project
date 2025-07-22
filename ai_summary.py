@@ -1,5 +1,4 @@
-import subprocess
-import json
+import requests
 
 def generate_prompt(cpu_data, mem_data, forecast_df):
     # Compute simple stats
@@ -35,26 +34,18 @@ Keep the tone professional, 5–6 lines max.
 
 def query_ollama_llama3(prompt):
     try:
-        command = [
-            "docker", "exec", "-i", "ollama",
-            "ollama", "run", "llama3", "--json"
-        ]
-
-        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        request_payload = {
-            "prompt": prompt,
-            "stream": False
-        }
-
-        stdout, stderr = process.communicate(json.dumps(request_payload))
-
-        if stderr:
-            raise RuntimeError(f"Ollama error: {stderr}")
-
-        output = json.loads(stdout)
-        return output.get("response", "No response generated.")
-
+        response = requests.post(
+            "http://localhost:11434/api/generate",  # Change this if Ollama runs elsewhere
+            json={
+                "model": "llama3",
+                "prompt": prompt,
+                "stream": False
+            },
+            timeout=120
+        )
+        response.raise_for_status()
+        result = response.json()
+        return result.get("response", "⚠️ No response from model.")
     except Exception as e:
         return f"⚠️ AI summary generation failed: {e}"
 
