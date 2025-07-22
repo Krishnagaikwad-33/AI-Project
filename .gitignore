@@ -1,1 +1,3 @@
 __pycache__/
+*.pyc
+ec2_ai_report.html
