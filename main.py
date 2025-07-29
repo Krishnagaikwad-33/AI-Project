@@ -19,7 +19,7 @@ def main():
     print("🤖 Generating AI summary via Ollama...")
     ai_summary = generate_ai_summary(
         cpu_data=metrics["CPUUtilization"],
-        mem_data=metrics["MemoryUtilization"],
+        mem_data=metrics["Memory Available MBytes"],
         forecast_df=forecast_df
     )
 
@@ -29,7 +29,7 @@ def main():
         instance_name=metrics["InstanceName"],
         private_ip=metrics["PrivateIp"],
         cpu_data=metrics["CPUUtilization"],
-        mem_data=metrics["MemoryUtilization"],
+        mem_data=metrics["Memory Available MBytes"],
         forecast_df=forecast_df,
         ai_summary=ai_summary,
         output_path=html_path
