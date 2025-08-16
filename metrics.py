@@ -1,23 +1,28 @@
 import boto3
 from datetime import datetime, timedelta
 
-def get_metrics(instance_id, region):
+def get_metrics(instance_id, region, days=30):
     cloudwatch = boto3.client("cloudwatch", region_name=region)
     ec2 = boto3.client("ec2", region_name=region)
 
-    # Time range: last 2 days
+    # Time range
     end_time = datetime.utcnow()
-    start_time = end_time - timedelta(days=2)
+    start_time = end_time - timedelta(days=days)
+
+    # Choose period based on range
+    if days <= 3:
+        period = 300   # 5 minutes for short-term
+    else:
+        period = 3600  # 1 hour for long-term
 
     def fetch_metric(metric_name):
         if metric_name == "Memory Available MBytes":
             namespace = "CWAgent"
-            unit = "None"  # Memory metrics typically use 'None'
+            unit = "None"
         else:
             namespace = "AWS/EC2"
-            unit = "Percent"  # CPU and other EC2 metrics use 'Percent'
+            unit = "Percent"
 
-        # Shared dimensions
         dimensions = [{"Name": "InstanceId", "Value": instance_id}]
 
         response = cloudwatch.get_metric_statistics(
@@ -26,12 +31,21 @@ def get_metrics(instance_id, region):
             Dimensions=dimensions,
             StartTime=start_time,
             EndTime=end_time,
-            Period=300,  # 5 minutes
+            Period=period,
             Statistics=["Average", "Maximum"],
             Unit=unit
         )
 
-        return sorted(response["Datapoints"], key=lambda x: x["Timestamp"])
+        # Sort by timestamp
+        data = sorted(response["Datapoints"], key=lambda x: x["Timestamp"])
+
+        # Clip CPU utilization values to 0–100
+        if metric_name == "CPUUtilization":
+            for dp in data:
+                dp["Average"] = max(0, min(100, dp["Average"]))
+                dp["Maximum"] = max(0, min(100, dp["Maximum"]))
+
+        return data
 
     # Get EC2 instance details
     instance_desc = ec2.describe_instances(InstanceIds=[instance_id])

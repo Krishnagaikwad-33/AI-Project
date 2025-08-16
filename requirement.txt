@@ -3,3 +3,4 @@ prophet
 pandas
 requests
 plotly
+openpyxl

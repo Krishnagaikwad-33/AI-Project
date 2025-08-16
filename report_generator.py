@@ -2,40 +2,6 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from datetime import datetime
 
-def generate_plot_html(cpu_data, mem_data, forecast_df):
-    # Time format fix
-    cpu_times = [point['Timestamp'].strftime('%Y-%m-%d %H:%M') for point in cpu_data]
-    mem_times = [point['Timestamp'].strftime('%Y-%m-%d %H:%M') for point in mem_data]
-    forecast_times = forecast_df['ds'].dt.strftime('%Y-%m-%d %H:%M')
-
-    # CPU Usage Chart
-    fig_cpu = go.Figure()
-    fig_cpu.add_trace(go.Scatter(x=cpu_times, y=[pt['Average'] for pt in cpu_data],
-                                 mode='lines+markers', name='CPU Avg', line=dict(color='royalblue')))
-    fig_cpu.add_trace(go.Scatter(x=cpu_times, y=[pt['Maximum'] for pt in cpu_data],
-                                 mode='lines', name='CPU Max', line=dict(dash='dot', color='red')))
-    fig_cpu.update_layout(title='CPU Utilization Trend', xaxis_title='Time', yaxis_title='Usage %', height=400)
-
-    # Memory Usage Chart
-    fig_mem = go.Figure()
-    fig_mem.add_trace(go.Scatter(x=mem_times, y=[pt['Average'] for pt in mem_data],
-                                 mode='lines+markers', name='Memory Avg', line=dict(color='green')))
-    fig_mem.add_trace(go.Scatter(x=mem_times, y=[pt['Maximum'] for pt in mem_data],
-                                 mode='lines', name='Memory Max', line=dict(dash='dot', color='orange')))
-    fig_mem.update_layout(title='Memory Utilization Trend', xaxis_title='Time', yaxis_title='Usage %', height=400)
-
-    # Forecast Chart
-    fig_forecast = go.Figure()
-    fig_forecast.add_trace(go.Scatter(x=forecast_times, y=forecast_df['yhat'], mode='lines', name='Forecast (CPU)', line=dict(color='purple')))
-    fig_forecast.update_layout(title='CPU Forecast (Prophet)', xaxis_title='Future Time', yaxis_title='Predicted Usage %', height=400)
-
-    # Export HTML divs
-    return {
-        'cpu_chart': pio.to_html(fig_cpu, full_html=False, include_plotlyjs='cdn'),
-        'mem_chart': pio.to_html(fig_mem, full_html=False, include_plotlyjs=False),
-        'forecast_chart': pio.to_html(fig_forecast, full_html=False, include_plotlyjs=False)
-    }
-
 def generate_html_report(instance_name, private_ip, cpu_data, mem_data, forecast_df, ai_summary, output_path='ec2_report.html'):
     plots = generate_plot_html(cpu_data, mem_data, forecast_df)
 

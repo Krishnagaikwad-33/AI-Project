@@ -14,27 +14,27 @@ def main():
     metrics = get_metrics(INSTANCE_ID, REGION)
 
     print("📈 Forecasting CPU usage...")
-    forecast_df = forecast_metric(metrics['CPUUtilization'], "CPUUtilization")
+    forecast_df = forecast_metric(metrics['CPUUtilization'], "CPUUtilization",)
 
-    print("🤖 Generating AI summary via Ollama...")
-    ai_summary = generate_ai_summary(
-        cpu_data=metrics["CPUUtilization"],
-        mem_data=metrics["Memory Available MBytes"],
-        forecast_df=forecast_df
-    )
+    # print("🤖 Generating AI summary via Ollama...")
+    # ai_summary = generate_ai_summary(
+    #     cpu_data=metrics["CPUUtilization"],
+    #     mem_data=metrics["Memory Available MBytes"],
+    #     forecast_df=forecast_df
+    # )
 
-    print("📄 Generating HTML report...")
-    html_path = "ec2_ai_report.html"
-    generate_html_report(
-        instance_name=metrics["InstanceName"],
-        private_ip=metrics["PrivateIp"],
-        cpu_data=metrics["CPUUtilization"],
-        mem_data=metrics["Memory Available MBytes"],
-        forecast_df=forecast_df,
-        ai_summary=ai_summary,
-        output_path=html_path
-    )
-
+    # print("📄 Generating HTML report...")
+    # html_path = "ec2_ai_report.html"
+    # generate_html_report(
+    #     instance_name=metrics["InstanceName"],
+    #     private_ip=metrics["PrivateIp"],
+    #     cpu_data=metrics["CPUUtilization"],
+    #     mem_data=metrics["Memory Available MBytes"],
+    #     forecast_df=forecast_df,
+    #     ai_summary=ai_summary,
+    #     output_path=html_path
+    # )
+    html_path = "forecast_report.html"
     print("☁️ Uploading to S3 and notifying SNS...")
     report_url = upload_to_s3_and_notify(html_path, S3_BUCKET, SNS_TOPIC)
 
